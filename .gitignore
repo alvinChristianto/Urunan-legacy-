@@ -1,0 +1,4 @@
+.node_modules
+.secret
+env.json
+truffle-config.js
