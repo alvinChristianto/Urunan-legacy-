@@ -26,14 +26,14 @@ contract Urun is Ownable{
 
     struct donationDetail{
         uint256 idApplication;
-        uint256 amount;
         donationStatus dstatus;
-        address donatur;
+        uint256 amount;
     }
-
 
     mapping(uint256 => fundDetail) public FundLists;
     mapping(uint256 => donationDetail) public Donations;
+    mapping(address => mapping(uint256 => uint256)) public Contributors;
+    //mapping(address => mapping(address => bool)) approved;
 
     //event 
 
@@ -64,29 +64,51 @@ contract Urun is Ownable{
         fstatus = fundStatus.Launch;
         dstatus = donationStatus.Ongoing;
 
-        address null_address;
+        //address null_address;
 
-        Donations[idDonation]= donationDetail(idApplication_, 0, dstatus, null_address);
+
+        Donations[idDonation]= donationDetail(idApplication_, dstatus, 0);
         FundLists[idApplication_].status= fstatus;
         return true;
     }
 
     function sendDonation(
         uint256 idDonation_,
-        uint256 amount_
+        uint256 amount_,
+        uint256 epochTime_
     ) external returns(bool) {
         //require not expire
         //idapplication status is launched
         //doantion status is ongoing
+        //check if donatur/contributor sudah berdonasi, sekarang tidak boleh donasi lebihd ari 1x
 
 
-        address donatur_ = _msgSender();
-        Donations[idDonation_].amount=  amount_;
-        Donations[idDonation_].donatur=  donatur_;
+        address contributor_ = _msgSender();
+        uint256 amountNeeded = FundLists[idDonation_].amount_needed;
+        uint256 amountNow = Donations[idDonation_].amount;              // amount yang sudah terkumpul sampai sekarang
+        
+
+        //if amountnow >= amountneeded => amount yang dibutuhkan sudah tercukupi. penggalangan dana berakhir.
+        //  set Fundlist => Completed, set Donations => Completed;
+        //if amount > amount needed - amountNow => jumlah amount terlalu besar, return false
+        //if check epochTime_ >= Fundlist.time_expired   
+        //  set Fundlist => notAchieved, set Donations => failed; 
+
+        // mekanisme approval dan transfer
+        Donations[idDonation_].amount = amountNow + amount_;
+        Contributors[contributor_][idDonation_] = amount_;
+
+        
         
         return true;
 
     }
 
+    function finalizeDonations(
+        idDonation_
+
+    )
+
+    function 
 
 }
